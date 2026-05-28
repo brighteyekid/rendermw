@@ -2,21 +2,16 @@
 
 <br/>
 
-<img src="https://img.shields.io/badge/rendermw-v0.1.0-6366f1?style=for-the-badge&labelColor=0f0f0f" alt="version">
+<img src="./logo.png" alt="rendermw" width="120" height="120">
+
+<br/><br/>
+
+<img src="https://img.shields.io/npm/v/rendermw?style=for-the-badge&color=6366f1&labelColor=0f0f0f" alt="npm version">
 <img src="https://img.shields.io/badge/tests-108%20passing-22c55e?style=for-the-badge&labelColor=0f0f0f" alt="tests">
 <img src="https://img.shields.io/badge/zero-dependencies-f59e0b?style=for-the-badge&labelColor=0f0f0f" alt="zero deps">
 <img src="https://img.shields.io/badge/license-MIT-94a3b8?style=for-the-badge&labelColor=0f0f0f" alt="MIT">
 
 <br/><br/>
-
-```
-  ██████╗ ███████╗███╗   ██╗██████╗ ███████╗██████╗ ███╗   ███╗██╗    ██╗
-  ██╔══██╗██╔════╝████╗  ██║██╔══██╗██╔════╝██╔══██╗████╗ ████║██║    ██║
-  ██████╔╝█████╗  ██╔██╗ ██║██║  ██║█████╗  ██████╔╝██╔████╔██║██║ █╗ ██║
-  ██╔══██╗██╔══╝  ██║╚██╗██║██║  ██║██╔══╝  ██╔══██╗██║╚██╔╝██║██║███╗██║
-  ██║  ██║███████╗██║ ╚████║██████╔╝███████╗██║  ██║██║ ╚═╝ ██║╚███╔███╔╝
-  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝ ╚══╝╚══╝
-```
 
 ### *Bots get semantic HTML. Users get your SPA. You get rankings.*
 
@@ -27,6 +22,10 @@
 ```bash
 npm install rendermw
 ```
+
+<br/>
+
+[Documentation](#the-problem) &nbsp;·&nbsp; [Quick Start](#quick-start) &nbsp;·&nbsp; [API Reference](#api-reference) &nbsp;·&nbsp; [Code of Conduct](./CODE_OF_CONDUCT.md) &nbsp;·&nbsp; [Security](./SECURITY.md)
 
 <br/>
 

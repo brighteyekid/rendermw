@@ -15,7 +15,8 @@
     "dist",
     "README.md",
     "LICENSE",
-    "diagram.png"
+    "diagram.png",
+    "logo.png"
   ],
   "scripts": {
     "build": "tsc",
