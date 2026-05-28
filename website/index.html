@@ -245,6 +245,48 @@ tr:hover td{background:var(--surface)}
   color:var(--indigo);margin-top:.5rem;display:block;
 }
 
+/* ── Bench tabs ─────────────────── */
+.bench-tabs{
+  display:flex;gap:0;border:1px solid var(--border);
+  margin-bottom:0;overflow:hidden;
+}
+.bench-tab{
+  flex:1;padding:.7rem 1.2rem;
+  font-family:'DM Mono',monospace;font-size:.72rem;font-weight:400;
+  letter-spacing:.06em;color:var(--muted);
+  background:transparent;border:none;border-right:1px solid var(--border);
+  cursor:pointer;transition:background .15s,color .15s;
+}
+.bench-tab:last-child{border-right:none}
+.bench-tab:hover{color:#e2e8f0;background:var(--surface)}
+.bench-tab.active{color:var(--indigo);background:var(--indigo-dim)}
+.bench-panel{border:1px solid var(--border);border-top:none}
+.bench-panel.hidden{display:none}
+.http-table-wrap{overflow-x:auto}
+.http-table{width:100%;border-collapse:collapse}
+.http-table th{
+  font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.1em;
+  color:var(--muted);font-weight:400;text-align:left;
+  padding:.9rem 1.4rem;border-bottom:1px solid var(--border);
+  background:var(--surface);
+}
+.http-table td{
+  font-size:.83rem;color:#94a3b8;
+  padding:1rem 1.4rem;border-bottom:1px solid var(--border);
+  vertical-align:top;line-height:1.5;
+}
+.http-table tr:last-child td{border-bottom:none}
+.http-table td:first-child{color:#e2e8f0}
+.http-table tr:hover td{background:var(--surface)}
+.http-table .row-highlight td{background:rgba(99,102,241,.04)}
+.mono{font-family:'DM Mono',monospace;font-size:.8rem}
+.hi{color:var(--indigo)}
+.bench-footnote{
+  font-family:'DM Mono',monospace;font-size:.68rem;
+  color:var(--muted);padding:.9rem 1.4rem;
+  border-top:1px solid var(--border);
+}
+
 /* ── Footer ──────────────────────────── */
 footer{
   border-top:1px solid var(--border);
@@ -450,38 +492,93 @@ footer{
 
 <!-- Benchmarks -->
 <section class="bench reveal" id="benchmark">
-  <p class="section-label">benchmarks — node.js v22, linux x64</p>
-  <div class="bench-grid">
-    <div class="bench-card">
-      <span class="bench-val">701<span>ns</span></span>
-      <span class="bench-label">isBot() — non-bot</span>
-      <span class="bench-note">entire cost for a real user</span>
+  <p class="section-label">benchmarks — node.js v22, linux x64 · 100 connections · 10s</p>
+
+  <div class="bench-tabs">
+    <button class="bench-tab active" data-tab="micro">Micro</button>
+    <button class="bench-tab" data-tab="http">HTTP (autocannon)</button>
+  </div>
+
+  <div class="bench-panel" id="tab-micro">
+    <div class="bench-grid">
+      <div class="bench-card">
+        <span class="bench-val">701<span>ns</span></span>
+        <span class="bench-label">isBot() — non-bot</span>
+        <span class="bench-note">entire cost for a real user</span>
+      </div>
+      <div class="bench-card">
+        <span class="bench-val">37<span>ns</span></span>
+        <span class="bench-label">isBot() — Googlebot</span>
+        <span class="bench-note">26.74M ops/sec</span>
+      </div>
+      <div class="bench-card">
+        <span class="bench-val">38<span>ns</span></span>
+        <span class="bench-label">cache hit</span>
+        <span class="bench-note">26.53M ops/sec</span>
+      </div>
+      <div class="bench-card">
+        <span class="bench-val">7<span>ns</span></span>
+        <span class="bench-label">cache miss</span>
+        <span class="bench-note">153.95M ops/sec</span>
+      </div>
+      <div class="bench-card">
+        <span class="bench-val">337<span>ns</span></span>
+        <span class="bench-label">route match, 1 param</span>
+        <span class="bench-note">2.97M ops/sec</span>
+      </div>
+      <div class="bench-card">
+        <span class="bench-val">5.9<span>µs</span></span>
+        <span class="bench-label">full HTML shell</span>
+        <span class="bench-note">schema + breadcrumbs + OG</span>
+      </div>
     </div>
-    <div class="bench-card">
-      <span class="bench-val">37<span>ns</span></span>
-      <span class="bench-label">isBot() — Googlebot</span>
-      <span class="bench-note">26.74M ops/sec</span>
+  </div>
+
+  <div class="bench-panel hidden" id="tab-http">
+    <div class="http-table-wrap">
+      <table class="http-table">
+        <thead>
+          <tr>
+            <th>Scenario</th>
+            <th>Req/sec</th>
+            <th>Avg latency</th>
+            <th>p99</th>
+            <th>Throughput</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Plain Express</td>
+            <td class="mono hi">12.61K</td>
+            <td class="mono">7.44 ms</td>
+            <td class="mono">17 ms</td>
+            <td class="mono">3.22 MB/s</td>
+          </tr>
+          <tr>
+            <td>rendermw — non-bot</td>
+            <td class="mono">8.88K</td>
+            <td class="mono">10.79 ms</td>
+            <td class="mono">17 ms</td>
+            <td class="mono">2.33 MB/s</td>
+          </tr>
+          <tr>
+            <td>rendermw — bot (cache miss)</td>
+            <td class="mono">6.60K</td>
+            <td class="mono">14.74 ms</td>
+            <td class="mono">65 ms</td>
+            <td class="mono">15.21 MB/s</td>
+          </tr>
+          <tr class="row-highlight">
+            <td>rendermw — bot (cache hit)</td>
+            <td class="mono hi">9.75K</td>
+            <td class="mono">9.80 ms</td>
+            <td class="mono">17 ms</td>
+            <td class="mono hi">22.47 MB/s</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    <div class="bench-card">
-      <span class="bench-val">38<span>ns</span></span>
-      <span class="bench-label">cache hit</span>
-      <span class="bench-note">26.53M ops/sec</span>
-    </div>
-    <div class="bench-card">
-      <span class="bench-val">7<span>ns</span></span>
-      <span class="bench-label">cache miss</span>
-      <span class="bench-note">153.95M ops/sec</span>
-    </div>
-    <div class="bench-card">
-      <span class="bench-val">337<span>ns</span></span>
-      <span class="bench-label">route match, 1 param</span>
-      <span class="bench-note">2.97M ops/sec</span>
-    </div>
-    <div class="bench-card">
-      <span class="bench-val">5.9<span>µs</span></span>
-      <span class="bench-label">full HTML shell</span>
-      <span class="bench-note">schema + breadcrumbs + OG</span>
-    </div>
+    <p class="bench-footnote">Cache hit serves a full SEO HTML document at near-parity with plain Express throughput.</p>
   </div>
 </section>
 
@@ -520,6 +617,17 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     e.preventDefault();
     const target = document.querySelector(a.getAttribute('href'));
     if (target) lenis.scrollTo(target, { offset: -60, duration: 1.4 });
+  });
+});
+
+// Tab switching
+document.querySelectorAll('.bench-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const target = tab.dataset.tab;
+    document.querySelectorAll('.bench-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.bench-panel').forEach(p => p.classList.add('hidden'));
+    tab.classList.add('active');
+    document.getElementById(`tab-${target}`).classList.remove('hidden');
   });
 });
 

@@ -761,6 +761,43 @@ Total overhead ~8 µs  +  your DB latency
 
 The middleware itself adds less than **10 microseconds** of overhead. Your database is the only variable.
 
+### HTTP benchmarks (end-to-end)
+
+Real Express server, 100 concurrent connections, 10 second run, measured with [autocannon](https://github.com/mcollina/autocannon):
+
+```
+rendermw HTTP benchmark (Express + autocannon)
+connections=100  duration=10s  Node.js v22.22.2 — linux x64
+
+  Scenario                              Req/sec    Avg latency    p99
+  ─────────────────────────────────────────────────────────────────────
+  1. Plain Express                       12.61K       7.44 ms    17 ms
+  2. rendermw — non-bot request           8.88K      10.79 ms    17 ms
+  3. rendermw — bot (cache miss)          6.60K      14.74 ms    65 ms
+  4. rendermw — bot (cache hit)           9.75K       9.80 ms    17 ms
+```
+
+**Reading the numbers:**
+
+| Scenario | vs plain Express | Notes |
+|:---|:---:|:---|
+| Non-bot request | −30% req/sec | Cost of `isBot()` check + Express middleware chain overhead |
+| Bot, cache miss | −48% req/sec | Includes `render()` call + `buildShell()` + cache write |
+| Bot, cache hit | −23% req/sec | HTML served from `Map` — only overhead is the cache lookup |
+
+The non-bot overhead (~30%) reflects Express middleware chain cost, not rendermw logic — `isBot()` exits in under 1µs. The cache hit scenario nearly matches plain Express throughput while serving a complete SEO HTML document.
+
+Run it yourself:
+
+```bash
+npm install -D autocannon
+npm run build
+node bench/http-bench.js
+
+# Tune load
+CONNECTIONS=200 DURATION=20 node bench/http-bench.js
+```
+
 ---
 
 ## Contributing
