@@ -41,7 +41,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/brighteyekid/rendermw"
+    "url": "git+https://github.com/brighteyekid/rendermw.git"
   },
   "bugs": {
     "url": "https://github.com/brighteyekid/rendermw/issues"
