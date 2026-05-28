@@ -65,48 +65,11 @@ Zero indexing. Zero rich results. Zero rankings.
 
 ## How it works
 
-```
-                         Incoming Request
-                               │
-                               ▼
-                    ┌─────────────────────┐
-                    │  isBot(user-agent)? │
-                    └─────────────────────┘
-                          │         │
-                         YES        NO
-                          │         │
-                          │         └──────────────────► next()
-                          │                          (real user, zero cost)
-                          ▼
-              ┌───────────────────────────┐
-              │  matchPath(routes, path)  │
-              └───────────────────────────┘
-                      │         │
-                   MATCHED   NO MATCH
-                      │         │
-                      │         └──────────────────── ► next()
-                      ▼
-              ┌────────────────────┐
-              │  cache.get(key)?   │
-              └────────────────────┘
-                    │        │
-                   HIT      MISS
-                    │        │
-                    │        ▼
-                    │   route.render(params, query)
-                    │        │
-                    │        ▼
-                    │   buildShell(payload, siteUrl)
-                    │        │
-                    │        ▼
-                    │   cache.set(key, html, ttl)
-                    │        │
-                    └────────┘
-                             │
-                             ▼
-                      ◄ Complete HTML ►
-              X-Render-MW: fresh | cache
-```
+<div align="center">
+
+![rendermw request flow diagram](./diagram.png)
+
+</div>
 
 ---
 
@@ -742,6 +705,65 @@ After integrating rendermw and describing each route's data as a plain async fun
 
 ---
 
+## Benchmarks
+
+All numbers are measured on real hardware with Node.js v22. Run them yourself:
+
+```bash
+npm run build
+node bench/bench.js
+```
+
+```
+rendermw benchmark  (500,000 iterations each)
+
+  Benchmark                                             Speed          Throughput
+  ───────────────────────────────────────────────────────────────────────────────
+  isBot() — non-bot (Chrome UA)                   701.1 ns/op       1.43M ops/sec
+  isBot() — Googlebot                              37.4 ns/op      26.74M ops/sec
+  isBot() — Twitterbot                            124.9 ns/op       8.01M ops/sec
+  isBot() — with 5 extra custom bots              722.4 ns/op       1.38M ops/sec
+  RenderCache.get() — hit                          37.7 ns/op      26.53M ops/sec
+  RenderCache.get() — miss                           6.5 ns/op     153.95M ops/sec
+  RenderCache.set() — new key                     785.1 ns/op       1.27M ops/sec
+  matchPath() — no match                          114.5 ns/op       8.73M ops/sec
+  matchPath() — match, 1 param                    336.7 ns/op       2.97M ops/sec
+  matchPath() — match, 2 params                   429.9 ns/op       2.33M ops/sec
+  buildShell() — minimal payload                  118.5 ns/op       8.44M ops/sec
+  buildShell() — full (schema + breadcrumbs + OG)   5.92 µs/op       0.17M ops/sec
+
+  Measured on Node.js v22.22.2 — linux x64
+```
+
+### What the numbers mean
+
+| Scenario | Latency | Notes |
+|:---|---:|:---|
+| **Non-bot request overhead** | ~701 ns | The entire cost for a real user. One lowercase + substring scan. |
+| **Bot detection (Googlebot)** | ~37 ns | Matches early in the list. |
+| **Cache hit** | ~38 ns | Map lookup + expiry check. |
+| **Cache miss** | ~7 ns | Map lookup only, key absent. |
+| **Route match** | ~337 ns | Split + iterate segments. |
+| **Full HTML shell (minimal)** | ~119 ns | Template string assembly, no schema. |
+| **Full HTML shell (complete)** | ~5.9 µs | Includes JSON.stringify for schema + breadcrumbs. |
+
+**Real-world latency budget for a bot, cache miss:**
+
+```
+isBot()        ~0.7 µs
+matchPath()    ~0.4 µs
+cache.get()    ~0.04 µs
+route.render() your DB query (e.g. 2–20 ms)
+buildShell()   ~6 µs
+cache.set()    ~0.8 µs
+               ────────
+Total overhead ~8 µs  +  your DB latency
+```
+
+The middleware itself adds less than **10 microseconds** of overhead. Your database is the only variable.
+
+---
+
 ## Contributing
 
 ```bash
@@ -749,8 +771,9 @@ git clone https://github.com/brighteyekid/rendermw
 cd rendermw
 npm install
 
-npm test        # 108 tests across 5 suites
-npm run build   # compile TypeScript to dist/
+npm test           # 108 tests across 5 suites
+npm run build      # compile TypeScript to dist/
+node bench/bench.js  # run benchmarks
 ```
 
 All source lives in `src/`. Tests in `tests/`. PRs and issues welcome.
