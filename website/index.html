@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scrollbar-width:none;-ms-overflow-style:none;scroll-behavior:smooth}
+html{scrollbar-width:none;-ms-overflow-style:none}
 html::-webkit-scrollbar{display:none}
 body{background:#080808;color:#e2e8f0;font-family:'DM Sans',sans-serif;font-weight:300;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 
@@ -53,7 +53,7 @@ nav{
 .hero{
   min-height:100vh;
   display:flex;flex-direction:column;justify-content:center;align-items:center;
-  text-align:center;padding:0 2rem;
+  text-align:center;padding:8rem 2rem 0;
   position:relative;overflow:hidden;
 }
 .hero-grid{
@@ -66,12 +66,12 @@ nav{
   pointer-events:none;
 }
 .hero-glow{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);
-  width:700px;height:400px;
-  background:radial-gradient(ellipse,rgba(99,102,241,.13) 0%,transparent 70%);
+  position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);
+  width:800px;height:500px;
+  background:radial-gradient(ellipse,rgba(99,102,241,.11) 0%,transparent 70%);
   pointer-events:none;
 }
-.hero-inner{position:relative;z-index:1;max-width:800px}
+.hero-inner{position:relative;z-index:1;max-width:820px;flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:4rem}
 .hero-label{
   display:inline-block;
   font-family:'DM Mono',monospace;font-size:.7rem;font-weight:400;
@@ -281,6 +281,7 @@ footer{
   footer{flex-direction:column;gap:1.2rem;text-align:center}
 }
 </style>
+<script src="https://unpkg.com/lenis@1.1.14/dist/lenis.min.js"></script>
 </head>
 <body>
 
@@ -498,6 +499,31 @@ footer{
 </footer>
 
 <script>
+// Lenis smooth scroll
+const lenis = new Lenis({
+  duration: 1.2,
+  easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+  smoothWheel: true,
+  wheelMultiplier: 0.9,
+  touchMultiplier: 1.8,
+});
+
+function raf(time) {
+  lenis.raf(time);
+  requestAnimationFrame(raf);
+}
+requestAnimationFrame(raf);
+
+// Anchor links — let Lenis handle smooth scroll to sections
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) lenis.scrollTo(target, { offset: -60, duration: 1.4 });
+  });
+});
+
+// Reveal on scroll
 const io = new IntersectionObserver(entries => {
   entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible') });
 }, { threshold: 0.08 });
